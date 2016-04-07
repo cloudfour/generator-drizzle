@@ -44,6 +44,7 @@
     "gulp-mocha": "^2.0.0",
     "gulp-nsp": "^2.1.0",
     "gulp-plumber": "^1.0.0",
+    "ramda": "^0.20.1",
     "yeoman-assert": "^2.0.0",
     "yeoman-test": "^1.0.0"
   },

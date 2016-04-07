@@ -9,6 +9,12 @@
 const chalk = require('chalk');
 const inquirer = require('inquirer');
 const yeoman = require('yeoman-generator');
+const utils = require('./utils');
+
+const INTRO = `
+${chalk.bold.underline('Welcome to your new Drizzle project.')}
+${chalk.dim('Beginning setup phase...')}
+`;
 
 const separator = label =>
   new inquirer.Separator(`--- ${label} ---`);
@@ -19,14 +25,33 @@ const dependencyConflicts = new Map([
   ['underscore', 'ramda']
 ]);
 
+const propExtras = {
+  // TODO: Add logic to compute this from `props.repository`
+  get repositoryRoot () {
+    return 'path/to/clone';
+  }
+};
+
 const prompts = [
   {
     name: 'title',
     type: 'input',
-    message: 'Project title',
+    message: 'Title',
     default: 'Drizzle Project',
     validate (input) {
       return input.length > 1;
+    }
+  },
+  {
+    name: 'slug',
+    type: 'input',
+    message: 'Slug',
+    default (answers) {
+      return utils.toSlug(answers.title);
+    },
+    validate (input) {
+      // TODO: Might be too strict...just needs to be valid npm name
+      return utils.isSlug(input);
     }
   },
   {
@@ -37,6 +62,34 @@ const prompts = [
     validate (input) {
       return input.length > 1;
     }
+  },
+  {
+    name: 'author',
+    type: 'input',
+    message: 'Author',
+    default: 'Cloud Four',
+    validate (input) {
+      return input.length > 1;
+    }
+  },
+  {
+    name: 'repository',
+    type: 'input',
+    message: 'Repository URL',
+    default (answers) {
+      const author = utils.toSlug(answers.author);
+      const slug = answers.slug;
+      return `git@github.com:${author}/${slug}.git`;
+    }
+  },
+  {
+    name: 'nodeVersion',
+    type: 'list',
+    message: 'Node.js version',
+    choices: [
+      '>=4.0.0',
+      '>=5.0.0'
+    ]
   },
   {
     name: 'dependencies',
@@ -89,24 +142,22 @@ const prompts = [
 module.exports = class extends yeoman.Base {
   constructor (args, options) {
     super(args, options);
-    this.log(chalk.bold.underline('Welcome to your new Drizzle project.'));
-    this.log(chalk.dim('Beginning setup phase...'));
+    this.props = {};
+    this.log(INTRO);
   }
 
   prompting () {
     const done = this.async();
     this.prompt(prompts, props => {
-      this.props = props;
-      console.log(this.props);
+      Object.assign(this.props, props, propExtras);
       done();
     });
   }
 
   writing () {
-    this.fs.copy(
-      this.templatePath('dummyfile.txt'),
-      this.destinationPath('dummyfile.txt')
-    );
+    const templates = this.templatePath();
+    const dest = this.destinationPath();
+    this.fs.copyTpl(`${templates}/*`, dest, this.props);
   }
 
   install () {
