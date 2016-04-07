@@ -24,6 +24,7 @@ const prompts = [
     name: 'title',
     type: 'input',
     message: 'Project title',
+    default: 'Drizzle Project',
     validate (input) {
       return input.length > 1;
     }
@@ -32,6 +33,7 @@ const prompts = [
     name: 'description',
     type: 'input',
     message: 'Project description',
+    default: 'A new Drizzle project.',
     validate (input) {
       return input.length > 1;
     }
