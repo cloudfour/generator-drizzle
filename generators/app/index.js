@@ -9,7 +9,6 @@
 const chalk = require('chalk');
 const inquirer = require('inquirer');
 const yeoman = require('yeoman-generator');
-const yosay = require('yosay');
 
 const separator = label =>
   new inquirer.Separator(`--- ${label} ---`);
@@ -20,13 +19,22 @@ const dependencyConflicts = new Map([
   ['underscore', 'ramda']
 ]);
 
+class Style {
+  static strong (text) {
+    return chalk.bold(text);
+  }
+  static muted (text) {
+    return chalk.dim(text);
+  }
+}
+
 const prompts = [
   {
     name: 'title',
     type: 'input',
     message: 'Project title',
     validate (input) {
-      return true;
+      return input.length > 1;
     }
   },
   {
@@ -34,7 +42,7 @@ const prompts = [
     type: 'input',
     message: 'Project description',
     validate (input) {
-      return true;
+      return input.length > 1;
     }
   },
   {
@@ -115,14 +123,12 @@ const prompts = [
 module.exports = class extends yeoman.Base {
   constructor (args, options) {
     super(args, options);
+    this.log(Style.strong('Welcome to your new Drizzle project.'));
+    this.log(Style.muted('Beginning setup phase...'));
   }
 
   prompting () {
     const done = this.async();
-
-    this.log('Welcome to your new Drizzle project.');
-    this.log('Beginning setup phase...');
-
     this.prompt(prompts, props => {
       this.props = props;
       console.log(this.props);
