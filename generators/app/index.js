@@ -19,15 +19,6 @@ const dependencyConflicts = new Map([
   ['underscore', 'ramda']
 ]);
 
-class Style {
-  static strong (text) {
-    return chalk.bold(text);
-  }
-  static muted (text) {
-    return chalk.dim(text);
-  }
-}
-
 const prompts = [
   {
     name: 'title',
@@ -123,8 +114,8 @@ const prompts = [
 module.exports = class extends yeoman.Base {
   constructor (args, options) {
     super(args, options);
-    this.log(Style.strong('Welcome to your new Drizzle project.'));
-    this.log(Style.muted('Beginning setup phase...'));
+    this.log(chalk.bold.underline('Welcome to your new Drizzle project.'));
+    this.log(chalk.dim('Beginning setup phase...'));
   }
 
   prompting () {
