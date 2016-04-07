@@ -44,43 +44,16 @@ const prompts = [
     message: 'Optional libraries',
     choices: [
       separator('JavaScript'),
-      {
-        name: 'GSAP',
-        value: 'gsap'
-      },
-      {
-        name: 'jQuery',
-        value: 'jquery'
-      },
-      {
-        name: 'LoDash',
-        value: 'lodash'
-      },
-      {
-        name: 'Moment',
-        value: 'moment'
-      },
-      {
-        name: 'Ramda',
-        value: 'ramda'
-      },
-      {
-        name: 'Underscore',
-        value: 'underscore'
-      },
+      'gsap',
+      'jquery',
+      'lodash',
+      'moment',
+      'ramda',
+      'underscore',
       separator('CSS'),
-      {
-        name: 'PostCSS Easings',
-        value: 'postcss-easings'
-      },
-      {
-        name: 'PostCSS Mixins',
-        value: 'postcss-mixins'
-      },
-      {
-        name: 'PostCSS Modular Scale',
-        value: 'css-modularscale'
-      }
+      'postcss-easings',
+      'postcss-mixins',
+      'css-modularscale'
     ]
   },
   {
