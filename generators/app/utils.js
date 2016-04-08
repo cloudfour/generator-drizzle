@@ -1,6 +1,7 @@
 'use strict';
 
 const R = require('ramda');
+const slug = require('slug');
 
 /**
  * Turn a string into a nice title.
@@ -24,21 +25,7 @@ const toTitle = R.pipe(
  * @returns {String}
  * @example toSlug('Nice Title!'); => nice-title
  */
-const toSlug = R.pipe(
-  R.toLower,
-  // Replace accent chars (TODO: needed?)
-  R.replace(/[\u00C0-\u00C5]/ig, 'a'),
-  R.replace(/[\u00C8-\u00CB]/ig, 'e'),
-  R.replace(/[\u00CC-\u00CF]/ig, 'i'),
-  R.replace(/[\u00D2-\u00D6]/ig, 'o'),
-  R.replace(/[\u00D9-\u00DC]/ig, 'u'),
-  R.replace(/[\u00D1]/ig, 'n'),
-  R.replace(/[^a-z0-9 ]+/gi, ''),
-  R.trim,
-  R.replace(/\s/g, '-'),
-  R.replace(/[\-]{2}/g, ''),
-  R.replace(/[^a-z\- ]*/gi, '')
-);
+const toSlug = R.pipe(R.toLower, slug);
 
 /**
  * Creates a GitHub repository URL.

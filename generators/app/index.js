@@ -134,7 +134,7 @@ module.exports = class extends yeoman.Base {
     this.props = {
       dependencies: [],
       nodeVersion: nodeVersions[0],
-      slug: this.appname
+      slug: utils.toSlug(this.appname)
     };
   }
 
