@@ -46,11 +46,9 @@ const dependencies = new Map([
 ]);
 
 // This is merged into props after the prompt phase.
-const computedProps = props => {
-  return {
-    repository: utils.toGitHubUrl(props.author, props.slug)
-  };
-};
+const computedProps = props => ({
+  repository: utils.toGitHubUrl(props.author, props.slug)
+});
 
 // Separator for list/checkbox prompts.
 const separator = label =>
