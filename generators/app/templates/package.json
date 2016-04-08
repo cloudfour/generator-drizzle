@@ -14,7 +14,7 @@
     "ui"
   ],
   "engines": {
-    "node": "<%== nodeVersion %>"
+    "node": "<%- nodeVersion %>"
   },
   "dependencies": {
 
