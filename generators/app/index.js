@@ -39,7 +39,7 @@ const prompts = [
     message: 'Title',
     default: 'Drizzle Project',
     validate (input) {
-      return input.length > 1;
+      return utils.isLongAs(2, input);
     }
   },
   {
@@ -60,7 +60,7 @@ const prompts = [
     message: 'Project description',
     default: 'A new Drizzle project.',
     validate (input) {
-      return input.length > 1;
+      return utils.isLongAs(2, input);
     }
   },
   {
@@ -69,7 +69,7 @@ const prompts = [
     message: 'Author',
     default: 'Cloud Four',
     validate (input) {
-      return input.length > 1;
+      return utils.isLongAs(2, input);
     }
   },
   {

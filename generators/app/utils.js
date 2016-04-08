@@ -6,7 +6,7 @@ const R = require('ramda');
  * Turn a string into a nice title.
  * @param {String}
  * @returns {String}
- * @example toTitle('some-slug_string'); // Some Slug String
+ * @example toTitle('some-slug_string'); => Some Slug String
  */
 const toTitle = R.pipe(
   // String => Array
@@ -22,10 +22,11 @@ const toTitle = R.pipe(
  * Inspired by https://gist.github.com/juanmhidalgo/3146760
  * @param {String}
  * @returns {String}
- * @example toSlug('Nice Title!'); // nice-title
+ * @example toSlug('Nice Title!'); => nice-title
  */
 const toSlug = R.pipe(
   R.toLower,
+  // Replace accent chars (TODO: needed?)
   R.replace(/[\u00C0-\u00C5]/ig, 'a'),
   R.replace(/[\u00C8-\u00CB]/ig, 'e'),
   R.replace(/[\u00CC-\u00CF]/ig, 'i'),
@@ -43,11 +44,35 @@ const toSlug = R.pipe(
  * Is a string a valid "slug"?
  * @param {String}
  * @returns {Boolean}
- * @example isSlug('no way Jose'); // false
+ * @example isSlug('no way Jose'); => false
  */
 const isSlug = R.test(/^[a-z]{1}[a-z0-9\-]*[^\-]$/);
 
+/**
+ * Is an object's `length` sufficient?
+ * @param {Number}
+ * @param {Array|String}
+ * @returns {Boolean}
+ * @example isLongAs(3, [1,2,3]); => true
+ * @example isLongAs(5, 'abcde'); => true
+ * @example isLongAs(4, [1,2,3]); => false
+ */
+const isLongAs = R.curry((len, obj) => obj.length >= len);
+
+/**
+ * @see http://ramdajs.com/docs/#evolve
+ * @param {Object}
+ * @param {Object}
+ * @returns {Object}
+ * @example
+ *  evolve({name: toSlug}, {name: 'Ricky Bobby'});
+ *  => {name: 'ricky-bobby'}
+ */
+const evolve = R.evolve;
+
 module.exports = {
+  evolve,
+  isLongAs,
   isSlug,
   toSlug,
   toTitle
