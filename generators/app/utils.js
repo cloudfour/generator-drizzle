@@ -41,6 +41,18 @@ const toSlug = R.pipe(
 );
 
 /**
+ * Creates a GitHub repository URL.
+ * @param {String} org
+ * @param {String} name
+ * @returns {String}
+ * @example toGitHubUrl('foo', 'bar'); => git@github.com:foo/bar.git
+ */
+const toGitHubUrl = (org, name) => {
+  const path = [org, name].map(toSlug).join('/');
+  return `git@github.com:${path}.git`;
+};
+
+/**
  * Is a string a valid "slug"?
  * @param {String}
  * @returns {Boolean}
@@ -62,6 +74,7 @@ const isLongAs = R.curry((len, obj) => obj.length >= len);
 module.exports = {
   isLongAs,
   isSlug,
+  toGitHubUrl,
   toSlug,
   toTitle
 };
