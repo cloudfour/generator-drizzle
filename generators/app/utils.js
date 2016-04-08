@@ -48,8 +48,7 @@ const toSlug = R.pipe(
  * @example toGitHubUrl('foo', 'bar'); => git@github.com:foo/bar.git
  */
 const toGitHubUrl = (org, name) => {
-  const path = [org, name].map(toSlug).join('/');
-  return `git@github.com:${path}.git`;
+  return `git@github.com:${org}/${name}.git`;
 };
 
 /**
