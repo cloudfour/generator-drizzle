@@ -158,6 +158,7 @@ module.exports = class extends yeoman.Base {
     const templates = this.templatePath();
     const dest = this.destinationPath();
     this.fs.copyTpl(`${templates}/*`, dest, this.props);
+    this.fs.copy(`${templates}/.github`, `${dest}/.github`);
   }
 
   install () {
