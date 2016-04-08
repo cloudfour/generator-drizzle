@@ -33,7 +33,7 @@ git clone <%= repository %>
 ### Run the project locally:
 
 ```sh
-cd <%= repositoryRoot %>
+cd path/to/your/clone
 npm start
 ```
 

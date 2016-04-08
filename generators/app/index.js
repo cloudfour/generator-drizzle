@@ -25,13 +25,6 @@ const dependencyConflicts = new Map([
   ['underscore', 'ramda']
 ]);
 
-const propExtras = {
-  // TODO: Add logic to compute this from `props.repository`
-  get repositoryRoot () {
-    return 'path/to/clone';
-  }
-};
-
 const prompts = [
   {
     name: 'title',
@@ -149,7 +142,7 @@ module.exports = class extends yeoman.Base {
   prompting () {
     const done = this.async();
     this.prompt(prompts, props => {
-      Object.assign(this.props, props, propExtras);
+      Object.assign(this.props, props);
       done();
     });
   }
