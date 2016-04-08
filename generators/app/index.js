@@ -33,12 +33,6 @@ const dependencies = new Map([
   ['css-modularscale', {type: 'postcss'}]
 ]);
 
-const dependencyConflicts = new Map([
-  ['ramda', 'lodash'],
-  ['lodash', 'underscore'],
-  ['underscore', 'ramda']
-]);
-
 // This is merged into props after the prompt phase.
 const computedProps = props => {
   return {
@@ -124,22 +118,6 @@ const prompts = [
     }
   },
   {
-    name: 'redundantDependencies',
-    type: 'checkbox',
-    message: 'Some of your chosen libraries are redundant. Remove some.',
-    when (answers) {
-      const deps = answers.dependencies;
-      return isDetailedMode(answers) && deps.some(dep => {
-        const conflict = dependencyConflicts.get(dep);
-        return deps.indexOf(conflict) !== -1;
-      });
-    },
-    choices (answers) {
-      const deps = answers.dependencies;
-      return deps.filter(dep => dependencyConflicts.has(dep));
-    }
-  },
-  {
     name: 'polyfills',
     type: 'confirm',
     message: messages.PROMPT_POLYFILL_CONFIRM,
@@ -160,7 +138,6 @@ module.exports = class extends yeoman.Base {
     super(args, options);
     this.props = {
       dependencies: [],
-      redundantDependencies: [],
       nodeVersion: nodeVersions[0],
       polyfills: false,
       serviceWorker: false
