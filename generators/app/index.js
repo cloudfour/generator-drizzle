@@ -53,28 +53,19 @@ const standardPrompts = [
     name: 'title',
     type: 'input',
     message: 'Title',
-    default: 'Untitled Drizzle Project',
-    validate (input) {
-      return utils.isLongAs(2, input);
-    }
+    default: 'Untitled Drizzle Project'
   },
   {
     name: 'description',
     type: 'input',
     message: 'Description',
-    default: 'A description of my project.',
-    validate (input) {
-      return utils.isLongAs(2, input);
-    }
+    default: 'A description of my project.'
   },
   {
     name: 'author',
     type: 'input',
     message: 'Author for package.json',
-    default: 'cloudfour',
-    validate (input) {
-      return utils.isLongAs(2, input);
-    }
+    default: 'cloudfour'
   }
 ];
 
