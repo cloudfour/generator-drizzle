@@ -6,18 +6,20 @@
  * @example yo drizzle
  */
 
-const chalk = require('chalk');
 const inquirer = require('inquirer');
 const yeoman = require('yeoman-generator');
 const utils = require('./utils');
+const messages = require('./messages');
 
-const INTRO = `
-${chalk.bold.underline('Welcome to your new Drizzle project.')}
-${chalk.dim('Beginning setup phase...')}
-`;
+const modes = [
+  'easy',
+  'detailed'
+];
 
-const separator = label =>
-  new inquirer.Separator(`--- ${label} ---`);
+const nodeVersions = [
+  '>=4.0.0',
+  '>=5.0.0'
+];
 
 const dependencies = new Map([
   ['gsap', {type: 'js'}],
@@ -37,33 +39,42 @@ const dependencyConflicts = new Map([
   ['underscore', 'ramda']
 ]);
 
+// This is merged into props after the prompt phase.
+const computedProps = props => {
+  return {
+    slug: utils.toSlug(props.title)
+  };
+};
+
+// Separator for list/checkbox prompts.
+const separator = label =>
+  new inquirer.Separator(`--- ${label} ---`);
+
+// Used to decide which prompts to skip.
+const isDetailedMode = answers =>
+  answers.mode === 'detailed';
+
 const prompts = [
+  {
+    name: 'mode',
+    type: 'list',
+    message: messages.PROMPT_MODE_CHOICE,
+    choices: modes
+  },
   {
     name: 'title',
     type: 'input',
-    message: 'Title',
-    default: 'Drizzle Project',
+    message: messages.PROMPT_TITLE_INPUT,
+    default: 'Untitled Drizzle Project',
     validate (input) {
       return utils.isLongAs(2, input);
     }
   },
   {
-    name: 'slug',
-    type: 'input',
-    message: 'Slug',
-    default (answers) {
-      return utils.toSlug(answers.title);
-    },
-    validate (input) {
-      // TODO: Might be too strict...just needs to be valid npm name
-      return utils.isSlug(input);
-    }
-  },
-  {
     name: 'description',
     type: 'input',
-    message: 'Project description',
-    default: 'A new Drizzle project.',
+    message: messages.PROMPT_DESCRIPTION_INPUT,
+    default: 'A description of my project.',
     validate (input) {
       return utils.isLongAs(2, input);
     }
@@ -71,7 +82,7 @@ const prompts = [
   {
     name: 'author',
     type: 'input',
-    message: 'Author',
+    message: messages.PROMPT_AUTHOR_INPUT,
     default: 'Cloud Four',
     validate (input) {
       return utils.isLongAs(2, input);
@@ -80,38 +91,33 @@ const prompts = [
   {
     name: 'repository',
     type: 'input',
-    message: 'Repository URL',
+    message: messages.PROMPT_REPO_INPUT,
     default (answers) {
-      const author = utils.toSlug(answers.author);
-      const slug = answers.slug;
-      return `git@github.com:${author}/${slug}.git`;
+      return utils.toGitHubUrl(answers.author, answers.title);
     }
   },
   {
     name: 'nodeVersion',
     type: 'list',
-    message: 'Node.js version',
-    choices: [
-      '>=4.0.0',
-      '>=5.0.0'
-    ]
+    message: messages.PROMPT_NODEV_INPUT,
+    choices: nodeVersions,
+    when: isDetailedMode
   },
   {
     name: 'dependencies',
     type: 'checkbox',
-    message: 'Optional libraries',
+    message: messages.PROMPT_INSTALL_CHOICE,
+    when: isDetailedMode,
     choices () {
       const deps = Array.from(dependencies.keys());
+
       // Returns a filter function
       const byType = type =>
         key => dependencies.get(key).type === type;
 
       return [].concat(
-        // Group the JS packages
         separator('JavaScript'),
         deps.filter(byType('js')),
-
-        // Group the PostCSS packages
         separator('PostCSS'),
         deps.filter(byType('postcss'))
       );
@@ -123,7 +129,7 @@ const prompts = [
     message: 'Some of your chosen libraries are redundant. Remove some.',
     when (answers) {
       const deps = answers.dependencies;
-      return deps.some(dep => {
+      return isDetailedMode(answers) && deps.some(dep => {
         const conflict = dependencyConflicts.get(dep);
         return deps.indexOf(conflict) !== -1;
       });
@@ -136,13 +142,15 @@ const prompts = [
   {
     name: 'polyfills',
     type: 'confirm',
-    message: 'Polyfills',
+    message: messages.PROMPT_POLYFILL_CONFIRM,
+    when: isDetailedMode,
     default: false
   },
   {
-    name: 'serviceworker',
+    name: 'serviceWorker',
     type: 'confirm',
-    message: 'Service Worker',
+    message: messages.PROMPT_SERVICEWORKER_CONFIRM,
+    when: isDetailedMode,
     default: false
   }
 ];
@@ -150,14 +158,24 @@ const prompts = [
 module.exports = class extends yeoman.Base {
   constructor (args, options) {
     super(args, options);
-    this.props = {};
-    this.log(INTRO);
+    this.props = {
+      dependencies: [],
+      redundantDependencies: [],
+      nodeVersion: nodeVersions[0],
+      polyfills: false,
+      serviceWorker: false
+    };
+    this.log(messages.INTRO);
   }
 
   prompting () {
     const done = this.async();
     this.prompt(prompts, props => {
-      Object.assign(this.props, props);
+      Object.assign(
+        this.props,
+        props,
+        computedProps(props)
+      );
       done();
     });
   }
