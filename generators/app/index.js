@@ -19,6 +19,18 @@ ${chalk.dim('Beginning setup phase...')}
 const separator = label =>
   new inquirer.Separator(`--- ${label} ---`);
 
+const dependencies = new Map([
+  ['gsap', {type: 'js'}],
+  ['jquery', {type: 'js'}],
+  ['lodash', {type: 'js'}],
+  ['moment', {type: 'js'}],
+  ['ramda', {type: 'js'}],
+  ['underscore', {type: 'js'}],
+  ['postcss-easings', {type: 'postcss'}],
+  ['postcss-mixins', {type: 'postcss'}],
+  ['css-modularscale', {type: 'postcss'}]
+]);
+
 const dependencyConflicts = new Map([
   ['ramda', 'lodash'],
   ['lodash', 'underscore'],
@@ -88,19 +100,22 @@ const prompts = [
     name: 'dependencies',
     type: 'checkbox',
     message: 'Optional libraries',
-    choices: [
-      separator('JavaScript'),
-      'gsap',
-      'jquery',
-      'lodash',
-      'moment',
-      'ramda',
-      'underscore',
-      separator('CSS'),
-      'postcss-easings',
-      'postcss-mixins',
-      'css-modularscale'
-    ]
+    choices () {
+      const deps = Array.from(dependencies.keys());
+      // Returns a filter function
+      const byType = type =>
+        key => dependencies.get(key).type === type;
+
+      return [].concat(
+        // Group the JS packages
+        separator('JavaScript'),
+        deps.filter(byType('js')),
+
+        // Group the PostCSS packages
+        separator('PostCSS'),
+        deps.filter(byType('postcss'))
+      );
+    }
   },
   {
     name: 'redundantDependencies',
