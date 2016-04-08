@@ -59,19 +59,7 @@ const isSlug = R.test(/^[a-z]{1}[a-z0-9\-]*[^\-]$/);
  */
 const isLongAs = R.curry((len, obj) => obj.length >= len);
 
-/**
- * @see http://ramdajs.com/docs/#evolve
- * @param {Object}
- * @param {Object}
- * @returns {Object}
- * @example
- *  evolve({name: toSlug}, {name: 'Ricky Bobby'});
- *  => {name: 'ricky-bobby'}
- */
-const evolve = R.evolve;
-
 module.exports = {
-  evolve,
   isLongAs,
   isSlug,
   toSlug,
