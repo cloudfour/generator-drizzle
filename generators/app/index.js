@@ -4,139 +4,175 @@
  * Drizzle Project Yeoman Generator
  *
  * @example yo drizzle
+ * @example yo drizzle --full
+ * @example yo drizzle --help
  */
 
 const chalk = require('chalk');
 const inquirer = require('inquirer');
 const yeoman = require('yeoman-generator');
-const yosay = require('yosay');
+const utils = require('./utils');
 
+const INTRO = `
+${chalk.bold.underline('Welcome to your new Drizzle project.')}
+${chalk.dim('Beginning setup phase...')}
+`;
+
+// For use in a prompt
+const nodeVersions = [
+  '>=4.0.0',
+  '>=5.0.0'
+];
+
+// Command options (e.g. you drizzle --full)
+const standardOptions = new Map([
+  ['full', {
+    desc: 'Present the full list of prompts.',
+    type: Boolean,
+    default: false
+  }]
+]);
+
+// Optional things to install
+const dependencies = new Map([
+  ['gsap', {type: 'js'}],
+  ['jquery', {type: 'js'}],
+  ['lodash', {type: 'js'}],
+  ['moment', {type: 'js'}],
+  ['ramda', {type: 'js'}],
+  ['postcss-easings', {type: 'postcss'}],
+  ['postcss-mixins', {type: 'postcss'}],
+  ['css-modularscale', {type: 'postcss'}]
+]);
+
+// This is merged into props after the prompt phase.
+const computedProps = props => ({
+  repository: utils.toGitHubUrl(props.author, props.slug)
+});
+
+// Separator for list/checkbox prompts.
 const separator = label =>
   new inquirer.Separator(`--- ${label} ---`);
 
-const dependencyConflicts = new Map([
-  ['ramda', 'lodash'],
-  ['lodash', 'underscore'],
-  ['underscore', 'ramda']
-]);
-
-const prompts = [
+// Always presented
+const standardPrompts = [
   {
     name: 'title',
     type: 'input',
-    message: 'Project title',
-    validate (input) {
-      return true;
-    }
+    message: 'Title',
+    default: 'Untitled Drizzle Project'
   },
   {
     name: 'description',
     type: 'input',
-    message: 'Project description',
-    validate (input) {
-      return true;
-    }
+    message: 'Description',
+    default: 'A description of my project.'
+  },
+  {
+    name: 'author',
+    type: 'input',
+    message: 'Author for package.json',
+    default: 'cloudfour'
+  }
+];
+
+// Presented when the --full option is used
+const extraPrompts = [
+  {
+    name: 'nodeVersion',
+    type: 'list',
+    message: 'Node version for package.json',
+    choices: nodeVersions
   },
   {
     name: 'dependencies',
     type: 'checkbox',
-    message: 'Optional libraries',
-    choices: [
-      separator('JavaScript'),
-      {
-        name: 'GSAP',
-        value: 'gsap'
-      },
-      {
-        name: 'jQuery',
-        value: 'jquery'
-      },
-      {
-        name: 'LoDash',
-        value: 'lodash'
-      },
-      {
-        name: 'Moment',
-        value: 'moment'
-      },
-      {
-        name: 'Ramda',
-        value: 'ramda'
-      },
-      {
-        name: 'Underscore',
-        value: 'underscore'
-      },
-      separator('CSS'),
-      {
-        name: 'PostCSS Easings',
-        value: 'postcss-easings'
-      },
-      {
-        name: 'PostCSS Mixins',
-        value: 'postcss-mixins'
-      },
-      {
-        name: 'PostCSS Modular Scale',
-        value: 'css-modularscale'
-      }
-    ]
-  },
-  {
-    name: 'redundantDependencies',
-    type: 'checkbox',
-    message: 'Some of your chosen libraries are redundant. Remove some.',
-    when (answers) {
-      const deps = answers.dependencies;
-      return deps.some(dep => {
-        const conflict = dependencyConflicts.get(dep);
-        return deps.indexOf(conflict) !== -1;
-      });
-    },
-    choices (answers) {
-      const deps = answers.dependencies;
-      return deps.filter(dep => dependencyConflicts.has(dep));
+    message: 'Include optional packages?',
+    choices () {
+      const deps = Array.from(dependencies.keys());
+
+      // Returns a filter function
+      const byType = type =>
+        key => dependencies.get(key).type === type;
+
+      return [].concat(
+        separator('JavaScript'),
+        deps.filter(byType('js')),
+        separator('PostCSS'),
+        deps.filter(byType('postcss'))
+      );
     }
   },
   {
     name: 'polyfills',
     type: 'confirm',
-    message: 'Polyfills',
+    message: `Include ${chalk.underline('polyfills.io')} <script>?`,
     default: false
   },
   {
-    name: 'serviceworker',
+    name: 'serviceWorker',
     type: 'confirm',
-    message: 'Service Worker',
+    message: `Include ${chalk.underline('service-worker.js')} <script>?`,
     default: false
   }
 ];
 
 module.exports = class extends yeoman.Base {
+  /**
+   * Define options and arguments.
+   * Set the default properties (for optional prompts).
+   */
   constructor (args, options) {
     super(args, options);
+
+    // Setup options
+    standardOptions.forEach((val, key) =>
+      this.option(key, val)
+    );
+
+    // Setup default props
+    this.props = {
+      dependencies: [],
+      nodeVersion: nodeVersions[0],
+      slug: utils.toSlug(this.appname)
+    };
   }
 
+  /**
+   * Show the intro message.
+   * Present the prompts.
+   * Assign thier answers as properties.
+   */
   prompting () {
     const done = this.async();
+    const prompts = this.options.full ?
+      standardPrompts.concat(extraPrompts) : standardPrompts;
 
-    this.log('Welcome to your new Drizzle project.');
-    this.log('Beginning setup phase...');
+    this.log(INTRO);
 
     this.prompt(prompts, props => {
-      this.props = props;
-      console.log(this.props);
+      // Assign input props (must be done first)
+      Object.assign(this.props, props);
+      // Assign computed props
+      Object.assign(this.props, computedProps(this.props));
       done();
     });
   }
 
+  /**
+   * Render the EJS templates with `this.props`.
+   * Copy the static files into place.
+   */
   writing () {
-    this.fs.copy(
-      this.templatePath('dummyfile.txt'),
-      this.destinationPath('dummyfile.txt')
-    );
+    const templates = this.templatePath();
+    const dest = this.destinationPath();
+    this.fs.copyTpl(`${templates}/*`, dest, this.props);
+    this.fs.copy(`${templates}/.github`, `${dest}/.github`);
   }
 
+  /**
+   * Install Node dependencies.
+   */
   install () {
     this.installDependencies();
   }
