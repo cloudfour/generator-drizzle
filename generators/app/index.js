@@ -4,6 +4,8 @@
  * Drizzle Project Yeoman Generator
  *
  * @example yo drizzle
+ * @example yo drizzle --full
+ * @example yo drizzle --help
  */
 
 const chalk = require('chalk');
@@ -16,23 +18,19 @@ ${chalk.bold.underline('Welcome to your new Drizzle project.')}
 ${chalk.dim('Beginning setup phase...')}
 `;
 
-const modes = [
-  'easy',
-  'detailed'
-];
-
+// For use in a prompt
 const nodeVersions = [
   '>=4.0.0',
   '>=5.0.0'
 ];
 
+// Optional things to install
 const dependencies = new Map([
   ['gsap', {type: 'js'}],
   ['jquery', {type: 'js'}],
   ['lodash', {type: 'js'}],
   ['moment', {type: 'js'}],
   ['ramda', {type: 'js'}],
-  ['underscore', {type: 'js'}],
   ['postcss-easings', {type: 'postcss'}],
   ['postcss-mixins', {type: 'postcss'}],
   ['css-modularscale', {type: 'postcss'}]
@@ -41,7 +39,7 @@ const dependencies = new Map([
 // This is merged into props after the prompt phase.
 const computedProps = props => {
   return {
-    slug: utils.toSlug(props.title)
+    repository: utils.toGitHubUrl(props.author, props.slug)
   };
 };
 
@@ -49,17 +47,8 @@ const computedProps = props => {
 const separator = label =>
   new inquirer.Separator(`--- ${label} ---`);
 
-// Used to decide which prompts to skip.
-const isDetailedMode = answers =>
-  answers.mode === 'detailed';
-
-const prompts = [
-  {
-    name: 'mode',
-    type: 'list',
-    message: 'Setup',
-    choices: modes
-  },
+// Always presented
+const standardPrompts = [
   {
     name: 'title',
     type: 'input',
@@ -81,32 +70,26 @@ const prompts = [
   {
     name: 'author',
     type: 'input',
-    message: 'Author',
-    default: 'Cloud Four',
+    message: 'Author for package.json',
+    default: 'cloudfour',
     validate (input) {
       return utils.isLongAs(2, input);
     }
-  },
-  {
-    name: 'repository',
-    type: 'input',
-    message: 'Repository for package.json',
-    default (answers) {
-      return utils.toGitHubUrl(answers.author, answers.title);
-    }
-  },
+  }
+];
+
+// Presented when the --full option is used
+const extraPrompts = [
   {
     name: 'nodeVersion',
     type: 'list',
     message: 'Node version for package.json',
-    choices: nodeVersions,
-    when: isDetailedMode
+    choices: nodeVersions
   },
   {
     name: 'dependencies',
     type: 'checkbox',
     message: 'Include optional packages?',
-    when: isDetailedMode,
     choices () {
       const deps = Array.from(dependencies.keys());
 
@@ -126,42 +109,62 @@ const prompts = [
     name: 'polyfills',
     type: 'confirm',
     message: `Include ${chalk.underline('polyfills.io')} <script>?`,
-    when: isDetailedMode,
     default: false
   },
   {
     name: 'serviceWorker',
     type: 'confirm',
     message: `Include ${chalk.underline('service-worker.js')} <script>?`,
-    when: isDetailedMode,
     default: false
   }
 ];
 
 module.exports = class extends yeoman.Base {
+  /**
+   * Define options and arguments.
+   * Set the default properties (for optional prompts).
+   */
   constructor (args, options) {
     super(args, options);
+
+    this.option('full', {
+      desc: 'Present the full list of prompts.',
+      type: Boolean,
+      default: false
+    });
+
     this.props = {
       dependencies: [],
       nodeVersion: nodeVersions[0],
-      polyfills: false,
-      serviceWorker: false
+      slug: this.appname
     };
-    this.log(INTRO);
   }
 
+  /**
+   * Show the intro message.
+   * Present the prompts.
+   * Assign thier answers as properties.
+   */
   prompting () {
     const done = this.async();
+    const prompts = this.options.full ?
+      standardPrompts.concat(extraPrompts) : standardPrompts;
+
+    this.log(INTRO);
+
     this.prompt(prompts, props => {
-      Object.assign(
-        this.props,
-        props,
-        computedProps(props)
-      );
+      // Assign input props (must be done first)
+      Object.assign(this.props, props);
+      // Assign computed props
+      Object.assign(this.props, computedProps(this.props));
       done();
     });
   }
 
+  /**
+   * Render the EJS templates with `this.props`.
+   * Copy the static files into place.
+   */
   writing () {
     const templates = this.templatePath();
     const dest = this.destinationPath();
@@ -169,6 +172,9 @@ module.exports = class extends yeoman.Base {
     this.fs.copy(`${templates}/.github`, `${dest}/.github`);
   }
 
+  /**
+   * Install Node dependencies.
+   */
   install () {
     this.installDependencies();
   }
