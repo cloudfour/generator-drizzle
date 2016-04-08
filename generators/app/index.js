@@ -6,10 +6,15 @@
  * @example yo drizzle
  */
 
+const chalk = require('chalk');
 const inquirer = require('inquirer');
 const yeoman = require('yeoman-generator');
 const utils = require('./utils');
-const messages = require('./messages');
+
+const INTRO = `
+${chalk.bold.underline('Welcome to your new Drizzle project.')}
+${chalk.dim('Beginning setup phase...')}
+`;
 
 const modes = [
   'easy',
@@ -52,13 +57,13 @@ const prompts = [
   {
     name: 'mode',
     type: 'list',
-    message: messages.PROMPT_MODE_CHOICE,
+    message: 'Setup',
     choices: modes
   },
   {
     name: 'title',
     type: 'input',
-    message: messages.PROMPT_TITLE_INPUT,
+    message: 'Title',
     default: 'Untitled Drizzle Project',
     validate (input) {
       return utils.isLongAs(2, input);
@@ -67,7 +72,7 @@ const prompts = [
   {
     name: 'description',
     type: 'input',
-    message: messages.PROMPT_DESCRIPTION_INPUT,
+    message: 'Description',
     default: 'A description of my project.',
     validate (input) {
       return utils.isLongAs(2, input);
@@ -76,7 +81,7 @@ const prompts = [
   {
     name: 'author',
     type: 'input',
-    message: messages.PROMPT_AUTHOR_INPUT,
+    message: 'Author',
     default: 'Cloud Four',
     validate (input) {
       return utils.isLongAs(2, input);
@@ -85,7 +90,7 @@ const prompts = [
   {
     name: 'repository',
     type: 'input',
-    message: messages.PROMPT_REPO_INPUT,
+    message: 'Repository for package.json',
     default (answers) {
       return utils.toGitHubUrl(answers.author, answers.title);
     }
@@ -93,14 +98,14 @@ const prompts = [
   {
     name: 'nodeVersion',
     type: 'list',
-    message: messages.PROMPT_NODEV_INPUT,
+    message: 'Node version for package.json',
     choices: nodeVersions,
     when: isDetailedMode
   },
   {
     name: 'dependencies',
     type: 'checkbox',
-    message: messages.PROMPT_INSTALL_CHOICE,
+    message: 'Include optional packages?',
     when: isDetailedMode,
     choices () {
       const deps = Array.from(dependencies.keys());
@@ -120,14 +125,14 @@ const prompts = [
   {
     name: 'polyfills',
     type: 'confirm',
-    message: messages.PROMPT_POLYFILL_CONFIRM,
+    message: `Include ${chalk.underline('polyfills.io')} <script>?`,
     when: isDetailedMode,
     default: false
   },
   {
     name: 'serviceWorker',
     type: 'confirm',
-    message: messages.PROMPT_SERVICEWORKER_CONFIRM,
+    message: `Include ${chalk.underline('service-worker.js')} <script>?`,
     when: isDetailedMode,
     default: false
   }
@@ -142,7 +147,7 @@ module.exports = class extends yeoman.Base {
       polyfills: false,
       serviceWorker: false
     };
-    this.log(messages.INTRO);
+    this.log(INTRO);
   }
 
   prompting () {
