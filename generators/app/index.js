@@ -24,6 +24,15 @@ const nodeVersions = [
   '>=5.0.0'
 ];
 
+// Command options (e.g. you drizzle --full)
+const standardOptions = new Map([
+  ['full', {
+    desc: 'Present the full list of prompts.',
+    type: Boolean,
+    default: false
+  }]
+]);
+
 // Optional things to install
 const dependencies = new Map([
   ['gsap', {type: 'js'}],
@@ -118,12 +127,12 @@ module.exports = class extends yeoman.Base {
   constructor (args, options) {
     super(args, options);
 
-    this.option('full', {
-      desc: 'Present the full list of prompts.',
-      type: Boolean,
-      default: false
-    });
+    // Setup options
+    standardOptions.forEach((val, key) =>
+      this.option(key, val)
+    );
 
+    // Setup default props
     this.props = {
       dependencies: [],
       nodeVersion: nodeVersions[0],
