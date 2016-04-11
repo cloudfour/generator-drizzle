@@ -1,18 +1,40 @@
-'use strict';
-var path = require('path');
-var assert = require('yeoman-assert');
-var helpers = require('yeoman-test');
+/* eslint-env mocha */
 
-describe('generator-drizzle:app', function () {
-  before(function (done) {
-    helpers.run(path.join(__dirname, '../generators/app'))
-      .withPrompts({someAnswer: true})
+'use strict';
+
+const path = require('path');
+const assert = require('yeoman-assert');
+const helpers = require('yeoman-test');
+const GENERATOR_PATH = path.join(__dirname, '../generators/app');
+
+describe('generator-drizzle:app', () => {
+  const answerFixture = {
+    title: 'Test title',
+    description: 'Test description'
+  };
+
+  before(done => {
+    helpers.run(GENERATOR_PATH)
+      .withPrompts(answerFixture)
       .on('end', done);
   });
 
-  it('creates files', function () {
+  it('Creates a valid package.json', () => {
+    assert.jsonFileContent('package.json', {
+      description: answerFixture.description
+    });
+  });
+
+  it('Creates a README', () => {
+    assert.fileContent([
+      ['README.md', `# ${answerFixture.title}`]
+    ]);
+  });
+
+  it('Creates GitHub templates', () => {
     assert.file([
-      'dummyfile.txt'
+      '.github/ISSUE_TEMPLATE.md',
+      '.github/PULL_REQUEST_TEMPLATE.md'
     ]);
   });
 });
