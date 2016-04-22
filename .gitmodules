@@ -1,0 +1,3 @@
+[submodule "generators/app/templates/drizzle"]
+	path = generators/app/templates/drizzle
+	url = https://github.com/cloudfour/drizzle.git
