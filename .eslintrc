@@ -4,3 +4,4 @@ env:
 rules:
   space-before-function-paren: [2, "always"]
   no-warning-comments: 0
+  prefer-spread: 0
