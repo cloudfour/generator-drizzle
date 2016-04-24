@@ -171,10 +171,9 @@ module.exports = class extends yeoman.Base {
    * Install dependencies selected via prompt.
    */
   install () {
-    if (this.options.full && this.props.dependencies.length) {
-      this.npmInstall(this.props.dependencies, {
-        saveDev: true
-      });
+    const deps = this.props.dependencies;
+    if (deps.length) {
+      this.npmInstall(deps, {saveDev: true});
     }
   }
 
