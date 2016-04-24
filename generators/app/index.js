@@ -85,12 +85,6 @@ const extraPrompts = [
 
       return choices;
     }
-  },
-  {
-    name: 'serviceWorker',
-    type: 'confirm',
-    message: `Include a ${chalk.underline('service-worker.js')} script?`,
-    default: false
   }
 ];
 
