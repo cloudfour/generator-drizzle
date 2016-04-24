@@ -13,6 +13,11 @@ const inquirer = require('inquirer');
 const yeoman = require('yeoman-generator');
 const utils = require('./utils');
 
+const PackageType = {
+  POSTCSS: 'PostCSS',
+  JS: 'JavaScript'
+};
+
 const INTRO = `
 ${chalk.bold.underline('Welcome to your new Drizzle project.')}
 ${chalk.dim('Beginning setup phase...')}
@@ -33,14 +38,14 @@ const standardOptions = new Map([
 
 // Optional things to install
 const dependencies = new Map([
-  ['gsap', {type: 'js'}],
-  ['jquery', {type: 'js'}],
-  ['lodash', {type: 'js'}],
-  ['moment', {type: 'js'}],
-  ['ramda', {type: 'js'}],
-  ['postcss-easings', {type: 'postcss'}],
-  ['postcss-mixins', {type: 'postcss'}],
-  ['css-modularscale', {type: 'postcss'}]
+  ['gsap', PackageType.JS],
+  ['jquery', PackageType.JS],
+  ['lodash', PackageType.JS],
+  ['moment', PackageType.JS],
+  ['ramda', PackageType.JS],
+  ['postcss-easings', PackageType.POSTCSS],
+  ['postcss-mixins', PackageType.POSTCSS],
+  ['css-modularscale', PackageType.POSTCSS]
 ]);
 
 // Separator for list/checkbox prompts.
@@ -70,18 +75,15 @@ const extraPrompts = [
     type: 'checkbox',
     message: 'Include optional packages?',
     choices () {
-      const deps = Array.from(dependencies.keys());
+      const depGroups = utils.groupByVal(Array.from(dependencies));
+      const choices = [];
 
-      // Returns a filter function
-      const byType = type =>
-        key => dependencies.get(key).type === type;
+      Object.keys(depGroups).forEach(key => {
+        choices.push(separator(key));
+        choices.push.apply(choices, depGroups[key].map(utils.pairKey));
+      });
 
-      return [].concat(
-        separator('JavaScript'),
-        deps.filter(byType('js')),
-        separator('PostCSS'),
-        deps.filter(byType('postcss'))
-      );
+      return choices;
     }
   },
   {
