@@ -20,7 +20,7 @@ const PackageType = {
 
 const INTRO = `
 ${chalk.bold.underline('Welcome to your new Drizzle project.')}
-${chalk.dim('Beginning setup phase...')}
+${chalk.dim('Setup phase starting...')}
 `;
 
 const OUTRO = `
