@@ -1,7 +1,6 @@
 {
   "name": "generator-drizzle",
   "version": "0.0.1",
-  "private": true,
   "description": "Yeoman generator for Drizzle-based projects",
   "author": "Cloud Four",
   "homepage": "https://github.com/cloudfour/generator-drizzle",
