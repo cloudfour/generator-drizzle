@@ -1,5 +1,3 @@
-/* eslint-env mocha */
-
 'use strict';
 
 const path = require('path');
@@ -19,22 +17,28 @@ describe('generator-drizzle:app', () => {
       .on('end', done);
   });
 
-  it('Creates a valid package.json', () => {
-    assert.jsonFileContent('package.json', {
-      description: answerFixture.description
-    });
-  });
-
-  it('Creates a README', () => {
-    assert.fileContent([
-      ['README.md', `# ${answerFixture.title}`]
+  it('Creates expected files', () => {
+    assert.file([
+      '.babelrc',
+      '.editorconfig',
+      '.eslintrc',
+      '.github',
+      '.gitignore',
+      '.nvmrc',
+      '.github/ISSUE_TEMPLATE.md',
+      '.github/PULL_REQUEST_TEMPLATE.md',
+      'browserslist',
+      'config.js',
+      'gulpfile.js',
+      'package.json',
+      'README.md',
+      'src'
     ]);
   });
 
-  it('Creates GitHub templates', () => {
-    assert.file([
-      '.github/ISSUE_TEMPLATE.md',
-      '.github/PULL_REQUEST_TEMPLATE.md'
+  it('Creates a README with rendered content', () => {
+    assert.fileContent([
+      ['README.md', `# ${answerFixture.title}`]
     ]);
   });
 });

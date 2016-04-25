@@ -18,7 +18,7 @@
 
 ### Download and install [Node.js]:
 
-This project requires [Node.js] `<%= nodeVersion %>` or later. If you already have Node.js installed, you can verify the versions by running:
+This project requires [Node.js] `4.0.0` or later. If you already have Node.js installed, you can verify the versions by running:
 
 ```sh
 node -v
@@ -27,7 +27,7 @@ node -v
 ### Clone the project:
 
 ```sh
-git clone <%= repository %>
+git clone https://github.com/your/repository.git
 ```
 
 ### Run the project locally:

@@ -57,9 +57,55 @@ const isSlug = R.test(/^[a-z]{1}[a-z0-9\-]*[^\-]$/);
  */
 const isLongAs = R.curry((len, obj) => obj.length >= len);
 
+/**
+ * Get the key of a key-value pair array ([0]).
+ * This is useful for array mapping.
+ * @param {Array}
+ * @returns {String|Number}
+ * @example pairKey(['apple', 'red']); // => apple
+ */
+const pairKey = R.prop(0);
+
+/**
+ * Get the value of a key-value pair array ([1]).
+ * This is useful for array mapping.
+ * @param {Array}
+ * @returns {String|Number}
+ * @example pairVal(['apple', 'red']); // => red
+ */
+const pairVal = R.prop(1);
+
+/**
+ * Group an array of objects by some common property.
+ * @param {String}
+ * @param {Array}
+ * @returns {Object}
+ * @example
+ *   groupByProp('id', [{id: 'a'}, {id: 'b'}]);
+ *   // => {a: [{id: 'a'}], b: [{id: 'b'}]}
+ */
+const groupByProp = R.curry(
+  (prop, list) => R.groupBy(R.prop(prop), list)
+);
+
+/**
+ * Group an array of key-value pairs by each value.
+ * @param {Array}
+ * @returns {Object}
+ * @example
+ *   groupByVal([[1, 'a'], [2, 'b']]);
+ *   // => {a: [1, 'a'], b: [2, 'b']}
+ */
+const groupByVal = R.groupBy(pairVal);
+
 module.exports = {
+  concat: R.concat,
+  groupByProp,
+  groupByVal,
   isLongAs,
   isSlug,
+  pairKey,
+  pairVal,
   toGitHubUrl,
   toSlug,
   toTitle

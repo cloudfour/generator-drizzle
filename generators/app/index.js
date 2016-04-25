@@ -13,16 +13,19 @@ const inquirer = require('inquirer');
 const yeoman = require('yeoman-generator');
 const utils = require('./utils');
 
+const PackageType = {
+  POSTCSS: 'PostCSS',
+  JS: 'JavaScript'
+};
+
 const INTRO = `
 ${chalk.bold.underline('Welcome to your new Drizzle project.')}
-${chalk.dim('Beginning setup phase...')}
+${chalk.dim('Setup phase starting...')}
 `;
 
-// For use in a prompt
-const nodeVersions = [
-  '>=4.0.0',
-  '>=5.0.0'
-];
+const OUTRO = `
+${chalk.dim('Setup phase completed.')}
+`;
 
 // Command options (e.g. you drizzle --full)
 const standardOptions = new Map([
@@ -35,20 +38,15 @@ const standardOptions = new Map([
 
 // Optional things to install
 const dependencies = new Map([
-  ['gsap', {type: 'js'}],
-  ['jquery', {type: 'js'}],
-  ['lodash', {type: 'js'}],
-  ['moment', {type: 'js'}],
-  ['ramda', {type: 'js'}],
-  ['postcss-easings', {type: 'postcss'}],
-  ['postcss-mixins', {type: 'postcss'}],
-  ['css-modularscale', {type: 'postcss'}]
+  ['gsap', PackageType.JS],
+  ['jquery', PackageType.JS],
+  ['lodash', PackageType.JS],
+  ['moment', PackageType.JS],
+  ['ramda', PackageType.JS],
+  ['postcss-easings', PackageType.POSTCSS],
+  ['postcss-mixins', PackageType.POSTCSS],
+  ['css-modularscale', PackageType.POSTCSS]
 ]);
-
-// This is merged into props after the prompt phase.
-const computedProps = props => ({
-  repository: utils.toGitHubUrl(props.author, props.slug)
-});
 
 // Separator for list/checkbox prompts.
 const separator = label =>
@@ -67,53 +65,26 @@ const standardPrompts = [
     type: 'input',
     message: 'Description',
     default: 'A description of my project.'
-  },
-  {
-    name: 'author',
-    type: 'input',
-    message: 'Author for package.json',
-    default: 'cloudfour'
   }
 ];
 
 // Presented when the --full option is used
 const extraPrompts = [
   {
-    name: 'nodeVersion',
-    type: 'list',
-    message: 'Node version for package.json',
-    choices: nodeVersions
-  },
-  {
     name: 'dependencies',
     type: 'checkbox',
     message: 'Include optional packages?',
     choices () {
-      const deps = Array.from(dependencies.keys());
+      const depGroups = utils.groupByVal(Array.from(dependencies));
+      const choices = [];
 
-      // Returns a filter function
-      const byType = type =>
-        key => dependencies.get(key).type === type;
+      Object.keys(depGroups).forEach(key => {
+        choices.push(separator(key));
+        choices.push.apply(choices, depGroups[key].map(utils.pairKey));
+      });
 
-      return [].concat(
-        separator('JavaScript'),
-        deps.filter(byType('js')),
-        separator('PostCSS'),
-        deps.filter(byType('postcss'))
-      );
+      return choices;
     }
-  },
-  {
-    name: 'polyfills',
-    type: 'confirm',
-    message: `Include ${chalk.underline('polyfills.io')} <script>?`,
-    default: false
-  },
-  {
-    name: 'serviceWorker',
-    type: 'confirm',
-    message: `Include ${chalk.underline('service-worker.js')} <script>?`,
-    default: false
   }
 ];
 
@@ -133,9 +104,10 @@ module.exports = class extends yeoman.Base {
     // Setup default props
     this.props = {
       dependencies: [],
-      nodeVersion: nodeVersions[0],
       slug: utils.toSlug(this.appname)
     };
+
+    this.log(INTRO);
   }
 
   /**
@@ -148,32 +120,61 @@ module.exports = class extends yeoman.Base {
     const prompts = this.options.full ?
       standardPrompts.concat(extraPrompts) : standardPrompts;
 
-    this.log(INTRO);
-
     this.prompt(prompts, props => {
       // Assign input props (must be done first)
       Object.assign(this.props, props);
-      // Assign computed props
-      Object.assign(this.props, computedProps(this.props));
+
       done();
     });
   }
 
   /**
-   * Render the EJS templates with `this.props`.
-   * Copy the static files into place.
+   * Copy Drizzle folder contents to destination.
+   * Copy .github files to destination (TODO: move these to Drizzle)
+   * Render README.md template to destination.
    */
   writing () {
-    const templates = this.templatePath();
     const dest = this.destinationPath();
-    this.fs.copyTpl(`${templates}/*`, dest, this.props);
-    this.fs.copy(`${templates}/.github`, `${dest}/.github`);
+    const templates = this.templatePath();
+
+    this.fs.copy(`${templates}/drizzle/**/*`, dest, {
+      globOptions: {
+        dot: true,
+        ignore: [
+          '**/.git',
+          '**/.travis.yml',
+          '**/LICENSE',
+          '**/README.md'
+        ]
+      }
+    });
+
+    this.fs.copy(
+      `${templates}/.github`, `${dest}/.github`
+    );
+
+    this.fs.copyTpl(
+      `${templates}/README.md`,
+      `${dest}/README.md`,
+      this.props
+    );
   }
 
   /**
-   * Install Node dependencies.
+   * Extend the Drizzle package.json with prompt values.
+   * Install dependencies selected via prompt.
    */
   install () {
-    this.installDependencies();
+    const deps = this.props.dependencies;
+    if (deps.length) {
+      this.npmInstall(deps, {saveDev: true});
+    }
+  }
+
+  /**
+   * Signal the end.
+   */
+  end () {
+    this.log(OUTRO);
   }
 };

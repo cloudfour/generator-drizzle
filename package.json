@@ -3,13 +3,12 @@
   "version": "0.0.1",
   "private": true,
   "description": "Yeoman generator for Drizzle-based projects",
+  "author": "Cloud Four",
   "homepage": "https://github.com/cloudfour/generator-drizzle",
-  "repository": "git@github.com:cloudfour/generator-drizzle.git",
   "license": "MIT",
-  "author": {
-    "name": "Cloud Four",
-    "email": "info@cloudfour.com",
-    "url": "cloudfour.com"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cloudfour/generator-drizzle.git"
   },
   "keywords": [
     "pattern",
@@ -18,19 +17,19 @@
     "html",
     "yeoman-generator"
   ],
-  "files": [
-    "generators"
-  ],
-  "main": "generators/app/index.js",
   "engines": {
     "node": ">=4.0.0"
   },
+  "main": "generators/app/index.js",
+  "files": [
+    "generators"
+  ],
   "dependencies": {
     "chalk": "^1.1.3",
     "inquirer": "^0.12.0",
     "ramda": "^0.21.0",
     "slug": "^0.9.1",
-    "yeoman-generator": "^0.22.0",
+    "yeoman-generator": "^0.22.6",
     "yosay": "^1.0.2"
   },
   "devDependencies": {
