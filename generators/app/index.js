@@ -158,6 +158,12 @@ module.exports = class extends yeoman.Base {
       `${dest}/README.md`,
       this.props
     );
+
+    this.fs.copyTpl(
+      `${templates}/project.yaml`,
+      `${dest}/src/data/project.yaml`,
+      this.props
+    );
   }
 
   /**
