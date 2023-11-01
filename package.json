@@ -29,7 +29,7 @@
     "ramda": "^0.21.0",
     "slug": "^0.9.1",
     "yeoman-generator": "^0.24.1",
-    "yosay": "^1.0.2"
+    "yosay": "^3.0.0"
   },
   "devDependencies": {
     "babel-eslint": "^6.0.2",
